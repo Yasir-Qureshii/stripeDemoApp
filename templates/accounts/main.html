@@ -1,0 +1,133 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Demo App</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="{% static 'css/style.css' %}">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+<body>
+	{%  include 'accounts/navbar.html' %}
+	<div class="container-fluid">
+	{% block content %}
+
+
+
+	{% endblock %}
+    </div>
+</body>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <script>
+    	function preventSubmit(evt){
+    		evt.preventDefault();
+    	}
+        // validate numbers for text fields
+        function validate(evt) {
+          var theEvent = evt || window.event;
+
+          // Handle paste
+          if (theEvent.type === 'paste') {
+              key = event.clipboardData.getData('text/plain');
+          } else {
+          // Handle key press
+              var key = theEvent.keyCode || theEvent.which;
+              key = String.fromCharCode(key);
+          }
+          var regex = /[0-9]|\./;
+          if( !regex.test(key) ) {
+            theEvent.returnValue = false;
+            if(theEvent.preventDefault) theEvent.preventDefault();
+          }
+        }
+
+    </script>
+    <script>
+        //Put our input DOM element into a jQuery Object
+        var $jqDate = jQuery('input[name="expiry"]');
+
+        //Bind keyup/keydown to the input
+        $jqDate.bind('keyup','keydown', function(e){
+
+          //To accomdate for backspacing, we detect which key was pressed - if backspace, do nothing:
+            if(e.which !== 8) {
+                var numChars = $jqDate.val().length;
+                if(numChars === 2 ){
+                    var thisVal = $jqDate.val();
+                    thisVal += '/';
+                    $jqDate.val(thisVal);
+                }
+          }
+        });
+    </script>
+
+	<script type="text/javascript">
+    jQuery(document).ajaxSend(function(event, xhr, settings) {
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        function sameOrigin(url) {
+            // url could be relative or scheme relative or absolute
+            var host = document.location.host; // host + port
+            var protocol = document.location.protocol;
+            var sr_origin = '//' + host;
+            var origin = protocol + sr_origin;
+            // Allow absolute or scheme relative URLs to same origin
+            return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                // or any other URL that isn't scheme relative or absolute i.e relative.
+                !(/^(\/\/|http:|https:).*/.test(url));
+        }
+        function safeMethod(method) {
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+        }
+    });
+</script>
+    <script>
+	   $("#addPayment").on('submit', function(e){
+		   $("#stripe_message").text('Submitting response. Please wait.');
+		   e.preventDefault();
+		   $.ajax({
+				type:"POST",
+				url:"{% url 'add_payment' %}",
+				data: {
+					card_no: $('input:text[name=card_no]').val(),
+					expiry: $('input:text[name=expiry]').val(),
+					cvc: $('input:text[name=cvc]').val(),
+					csrfmiddlewaretoken: '{{ csrf_token }}',
+					dataType: "json",
+				},
+				success: function(data){
+					console.log(data);
+					$("#stripe_message").text(data);
+					$(".paymentInput").prop( "disabled", true );
+				},
+				error: function(data){
+					$("#stripe_message").text(data.responseText);
+					console.log(data.responseText);
+				}
+			  });
+		   });
+    </script>
+</html>

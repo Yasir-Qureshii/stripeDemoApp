@@ -1,0 +1,107 @@
+{%  extends 'accounts/main.html' %}
+{% block content %}
+<br>
+
+<div class="row">
+    {% if subscription.state == 'trialing' or subscription.state == 'active' %}
+	<div class="col-md-10 mx-auto mt-5">
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th>Username</th>
+					<th>Email</th>
+					<th>Date Joined</th>
+					<th>Plan</th>
+					<th>Days Left</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>{{user.username}}</td>
+					<td>{{user.email}}</td>
+					<td>{{ user.date_joined }}</td>
+					<td>Aben Premium membership</td>
+					<td>7</td>
+				</tr>
+			</tbody>
+		</table>
+
+	</div>
+	{% else %}
+	<div class="text-center" style="margin: auto;width: 50%;margin-top:10%;">
+		<h3>You are not subscribed!</h3>
+		<a href="" class="btn btn-lg btn-info px-4">Subscribe Now</a>
+	</div>
+	{% endif %}
+
+</div>
+
+
+	<!-- Modal addCard -->
+    <div class="modal fade" id="addCard" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCardLabel">Add Card</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="addPayment" class="identity-upload" method="post">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                                <div class="col-xl-12 pb-2">
+                                    <label class="form-label">Card Number </label>
+                                    <input type="text" minlength="13" maxlength="19" onkeypress="validate(event)" name="card_no" class="form-control paymentInput" placeholder="5658 4258 6358 4756" required>
+                                </div>
+                                <div class="col-xl-4">
+                                    <label class="form-label">Expiration </label>
+                                    <input type="text" onkeypress="validate(event)" minlength="5" maxlength="5" name="expiry" class="form-control paymentInput" placeholder="10/22" required>
+                                </div>
+
+                                <div class="col-xl-4">
+                                    <label class="form-label">CVC </label>
+                                    <input type="text" onkeypress="validate(event)" minlength="3" maxlength="4" name="cvc" class="form-control paymentInput" placeholder="125" required>
+                                </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <p id="stripe_message" class="text-danger" style="font-size:13px;"></p>
+                        <button type="submit" class="btn btn-primary paymentInput" >Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Payment Details -->
+    <div class="modal fade" id="paymentDetails" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Payment Method Details
+                    </h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="auth-form">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <span class="mx-3 icon-circle bg-primary text-white"><i class="icofont-email"></i></span>
+                                <div class="primary-number">
+                                    <p class="mb-0">{{ payment_obj.card.brand|title }}</p>
+                                    <small>{{ payment_obj.card.funding|title }} Card *********{{ payment_obj.card.last4 }}</small>
+                                    <br>
+                                    <small>Exp:</small> <span class="text-success">{{ payment_obj.card.exp_month }}/{{ payment_obj.card.exp_year }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
